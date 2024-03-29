@@ -1,3 +1,5 @@
+# supabase and firebase authentication working with fastapi
+
 To build the docker image:
 ```
 docker build -t fastapiauth .
