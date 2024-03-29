@@ -1,0 +1,6 @@
+pydantic
+python-multipart
+fastapi
+uvicorn
+firebase_admin
+supabase

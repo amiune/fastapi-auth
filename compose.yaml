@@ -1,0 +1,7 @@
+services:
+  app:
+    build: .
+    container_name: fastapi-auth
+    command: uvicorn app.main:app --host 0.0.0.0 --port 80 --reload
+    ports:
+      - 80:80

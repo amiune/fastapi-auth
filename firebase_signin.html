@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FastAPI Auth</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+  </head>
+<body>
+
+    <!-- Hero -->
+    <div class="hero" data-theme="dark">
+      <nav class="container-fluid">
+        <ul>
+          <li>
+            <a href="#" class="contrast"><strong>FastAPI Auth</strong></a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!-- ./ Hero -->
+  
+
+    <main class="container">
+        <section>
+          
+          <div>
+            
+            <h6>Firebase Authentication</h6>
+            <button id="btnsignout">Sign Out</button>
+            <button id="btnfastapicall">FastAPI Call</button>
+            <div id="fastapiresponse"></div>
+
+          </div>
+            
+        </section>
+    </main>
+
+    <dialog id="modal">
+      <article>
+        <h2>Sign In</h2>
+        <p>
+          Introduce your email and password to enter:<br/><br/>
+          <input type="text" id="email" name="email" placeholder="email" autocomplete="email" size="10" value=""><br/>
+          <input type="text" id="password" name="password" placeholder="password" autocomplete="current-password" size="10" value=""><br/>
+          <button id="btnsignin">Sign In</button>
+        </p>
+      </article>
+    </dialog>
+
+    <script type="module">
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut}  from 'https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js'
+    
+      const firebaseConfig = {
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: ""
+      };
+
+      let modal = document.getElementById('modal');
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      //const user = auth.currentUser;
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const uid = user.uid;
+          console.log(uid);
+        } else {
+          modal.showModal();
+        }
+      });
+
+      let btnsignin = document.getElementById('btnsignin');
+      btnsignin.onclick = function() {
+
+        let email = document.getElementById('email').value;
+        let password = document.getElementById('password').value;
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            // Signed in 
+            const user = userCredential.user;
+            console.log(user);
+            modal.close();
+          })
+          .catch((error) => {
+            console.log(error.code);
+            console.log(error.message);
+          });
+        
+      };
+
+      let btnsignout = document.getElementById('btnsignout');
+      btnsignout.onclick = function() {
+        signOut(auth).then(() => {
+          // Sign-out successful.
+        }).catch((error) => {
+          // An error happened.
+        });
+      }
+
+      let btnfastapicall = document.getElementById('btnfastapicall');
+      btnfastapicall.onclick = async function() {
+        //fastapi call
+        let user = auth.currentUser;
+        console.log(user);
+        user.getIdToken().then((token) =>{
+              console.log(token);
+              let url = "http://127.0.0.1/firebase_user/";
+              fetch(url, {
+                method: 'POST', 
+                headers: {'Authorization':'Bearer ' + token,'Content-Type': 'application/json'},
+                body: JSON.stringify({})
+              }).then((response) => response.json())
+                  .then((json_response) => {
+                    console.log(json_response);
+                  });
+            });
+      }
+    
+    
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FastAPI Auth</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+  </head>
+<body>
+
+    <!-- Hero -->
+    <div class="hero" data-theme="dark">
+      <nav class="container-fluid">
+        <ul>
+          <li>
+            <a href="#" class="contrast"><strong>FastAPI Auth</strong></a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!-- ./ Hero -->
+  
+
+    <main class="container">
+        <section>
+          
+          <div>
+            
+            <h6>Supabase Authentication</h6>
+            <button id="btnsignout">Sign Out</button>
+            <button id="btnfastapicall">FastAPI Call</button>
+            <div id="fastapiresponse"></div>
+
+          </div>
+            
+        </section>
+    </main>
+
+    <dialog id="modal">
+      <article>
+        <h2>Sign In</h2>
+        <p>
+          Introduce your email and password to enter:<br/><br/>
+          <input type="text" id="email" name="email" placeholder="email" autocomplete="email" size="10" value=""><br/>
+          <input type="text" id="password" name="password" placeholder="password" autocomplete="current-password" size="10" value=""><br/>
+          <button id="btnsignin">Sign In</button>
+        </p>
+      </article>
+    </dialog>
+
+    <script type="module">
+
+      import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+      let session = null;
+      let token = null;
+
+
+      // Create a single supabase client for interacting with your database
+      const supabase = createClient('URL', 'PUBLIC_KEY')
+
+      let modal = document.getElementById('modal');
+      // Initialize Firebase
+
+
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log(event, session);
+        
+        if (session){
+          console.log(session.user);
+          session = session;
+          token = session.access_token;
+          modal.close();
+        }
+        else{
+          session = null;
+          token = null;
+          modal.showModal();
+        }
+      });
+
+      let btnsignin = document.getElementById('btnsignin');
+      btnsignin.onclick = async function() {
+
+        let email = document.getElementById('email').value;
+        let password = document.getElementById('password').value;
+
+        //signin
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+        console.log(data);
+        console.log(error);
+      };
+
+      let btnsignout = document.getElementById('btnsignout');
+      btnsignout.onclick = async function() {
+        //signoun
+        const { error } = await supabase.auth.signOut()
+      }
+
+      let btnfastapicall = document.getElementById('btnfastapicall');
+      btnfastapicall.onclick = async function() {
+        //fastapi call
+        console.log(token);
+        let url = "http://127.0.0.1/supabase_user/";
+        fetch(url, {
+          method: 'POST', 
+          headers: {'Authorization':'Bearer ' + token,'Content-Type': 'application/json'},
+          body: JSON.stringify({})
+        }).then((response) => response.json())
+            .then((json_response) => {
+              console.log(json_response);
+            });
+      }
+    
+    
+    </script>
+
+</body>
+</html>
